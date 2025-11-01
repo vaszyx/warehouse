@@ -190,7 +190,11 @@ local function GetInventory(xPlayer, inventory)
                 inventory.id
             }, function(result)
                 if result and result[1] then
-                    Inventories[inventory.type][inventory.id] = json.decode(result[1].data)
+                    local decoded = json.decode(result[1].data)
+                    if type(decoded) ~= 'table' then
+                        decoded = {}
+                    end
+                    Inventories[inventory.type][inventory.id] = decoded
                 else
                     MySQL.execute('INSERT INTO inventories (type, identifier, data) VALUES (?, ?, ?)', {
                         inventory.type,
