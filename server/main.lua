@@ -106,10 +106,8 @@ local function GetPlayerInventory(xPlayer)
         if not Inventories['hotbar'][identifier] then
             Inventories['hotbar'][identifier] = {}
             if Config.HotbarSave then
-                MySQL.Async.fetchAll('SELECT hotbar FROM users WHERE identifier=@id', {
-                    ['@id'] = identifier
-                }, function(result)
-                    if #result > 0 then
+                MySQL.query('SELECT hotbar FROM users WHERE identifier = ?', { identifier }, function(result)
+                    if result and result[1] then
                         Inventories['hotbar'][identifier] = json.decode(result[1].hotbar) or {}
                     end
                     done:resolve()
@@ -187,17 +185,17 @@ local function GetInventory(xPlayer, inventory)
     local done = promise.new()
     if inventory.save then
         if next(Inventories[inventory.type][inventory.id]) == nil then
-            MySQL.Async.fetchAll('SELECT * FROM inventories WHERE type=@type AND identifier=@id', {
-                ['@type'] = inventory.type,
-                ['@id'] = inventory.id
+            MySQL.query('SELECT * FROM inventories WHERE type = ? AND identifier = ?', {
+                inventory.type,
+                inventory.id
             }, function(result)
-                if #result > 0 then
+                if result and result[1] then
                     Inventories[inventory.type][inventory.id] = json.decode(result[1].data)
                 else
-                    MySQL.Async.execute('INSERT INTO inventories (type, identifier, data) VALUES (@type, @id, @data)', {
-                        ['@type'] = inventory.type,
-                        ['@id'] = inventory.id,
-                        ['@data'] = json.encode({})
+                    MySQL.execute('INSERT INTO inventories (type, identifier, data) VALUES (?, ?, ?)', {
+                        inventory.type,
+                        inventory.id,
+                        json.encode({})
                     }, function()
                         Inventories[inventory.type][inventory.id] = {}
                         print(('^4Inventory created in DB ^7(%s, %s)'):format(inventory.type, inventory.id))
@@ -272,10 +270,10 @@ end
 local function SaveInventory(type, id)
     if not Inventories[type] or not Inventories[type][id] then return end
 
-    MySQL.Async.execute('UPDATE inventories SET data=@data WHERE type=@type AND identifier=@id', {
-        ['@type'] = type,
-        ['@id'] = id,
-        ['@data'] = json.encode(Inventories[type][id])
+    MySQL.execute('UPDATE inventories SET data = ? WHERE type = ? AND identifier = ?', {
+        json.encode(Inventories[type][id]),
+        type,
+        id
     })
 end
 
