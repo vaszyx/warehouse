@@ -15,7 +15,7 @@ Ein vollständiges Lagerhaus-Skript für das Chezza Inventory v3. Die Ressource 
 1. Lege den Ressourcen-Ordner in deinem `resources`-Verzeichnis ab und ergänze deine `server.cfg` um `ensure warehouse`.
 2. Stelle sicher, dass folgende Abhängigkeiten geladen sind:
    * `es_extended` (mindestens Legacy Version mit `imports.lua`)
-   * `mysql-async`
+   * `oxmysql`
    * Chezza Inventory v3
 3. Importiere – sofern noch nicht vorhanden – folgende Tabelle in deine Datenbank:
 
